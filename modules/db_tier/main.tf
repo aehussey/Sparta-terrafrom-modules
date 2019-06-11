@@ -1,7 +1,7 @@
 # DB
 # create a subnet
 resource "aws_subnet" "db" {
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
   cidr_block = "10.0.1.0/24"
   map_public_ip_on_launch = false
   availability_zone = "eu-west-1a"
@@ -14,13 +14,13 @@ resource "aws_subnet" "db" {
 resource "aws_security_group" "db"  {
   name = "${var.name}-db"
   description = "${var.name} db access"
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
 
   ingress {
     from_port       = "27017"
     to_port         = "27017"
     protocol        = "tcp"
-    security_groups = ["${aws_security_group.app.id}"]
+    security_groups = ["${var.security_group}"]
   }
 
   egress {
@@ -36,13 +36,13 @@ resource "aws_security_group" "db"  {
 }
 
 resource "aws_network_acl" "db" {
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
 
   ingress {
     protocol   = "tcp"
     rule_no    = 100
     action     = "allow"
-    cidr_block = "${aws_subnet.app.cidr_block}"
+    cidr_block = "${var.subnet_cidr_block}"
     from_port  = 27017
     to_port    = 27017
   }
@@ -53,7 +53,7 @@ resource "aws_network_acl" "db" {
     protocol   = "tcp"
     rule_no    = 120
     action     = "allow"
-    cidr_block = "${aws_subnet.app.cidr_block}"
+    cidr_block = "${var.subnet_cidr_block}"
     from_port  = 1024
     to_port    = 65535
   }
@@ -67,7 +67,7 @@ resource "aws_network_acl" "db" {
 
 # public route table
 resource "aws_route_table" "db" {
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
 
   tags = {
     Name = "${var.name}-db-private"

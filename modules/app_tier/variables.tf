@@ -16,5 +16,13 @@ variable "cidr_block" {
 }
 
 variable "app_vpc" {
-  default = "app_vpc"
+  description = "app_vpc"
+}
+
+variable "internet_gateway" {
+  description = "internet_gateway"
+}
+
+variable "template_file" {
+  description = "template_file"
 }

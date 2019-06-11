@@ -1,9 +1,9 @@
 variable "name" {
-  default="app-steve"
+  default="app-arthur"
 }
 
 variable "app_ami_id" {
-  default="ami-c2b8bfbb"
+  default="ami-03e3239774cb68a47"
 }
 
 variable "db_ami_id" {
@@ -12,8 +12,4 @@ variable "db_ami_id" {
 
 variable "cidr_block" {
   default="10.0.0.0/16"
-}
-
-variable "app_vpc" {
-  default = "app_vpc"
 }

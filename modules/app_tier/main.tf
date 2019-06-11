@@ -1,7 +1,7 @@
 # APP
 # create a subnet
 resource "aws_subnet" "app" {
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
   cidr_block = "10.0.0.0/24"
   map_public_ip_on_launch = true
   availability_zone = "eu-west-1a"
@@ -14,7 +14,7 @@ resource "aws_subnet" "app" {
 resource "aws_security_group" "app"  {
   name = "${var.name}"
   description = "${var.name} access"
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
 
   ingress {
     from_port       = "80"
@@ -36,7 +36,7 @@ resource "aws_security_group" "app"  {
 }
 
 resource "aws_network_acl" "app" {
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
 
   egress {
     protocol   = "tcp"
@@ -85,11 +85,11 @@ resource "aws_network_acl" "app" {
 
 # public route table
 resource "aws_route_table" "app" {
-  vpc_id = "${aws_vpc.app.id}"
+  vpc_id = "${var.app_vpc}"
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.app.id}"
+    gateway_id = "${var.internet_gateway}"
   }
 
   tags = {
@@ -102,20 +102,14 @@ resource "aws_route_table_association" "app" {
   route_table_id = "${aws_route_table.app.id}"
 }
 
-# load the init template
-data "template_file" "app_init" {
-   template = "${file("./scripts/app/init.sh.tpl")}"
-   vars {
-      db_host="mongodb://${aws_instance.db.private_ip}:27017/posts"
-   }
-}
+
 
 # launch an instance
 resource "aws_instance" "app" {
   ami           = "${var.app_ami_id}"
   subnet_id     = "${aws_subnet.app.id}"
   vpc_security_group_ids = ["${aws_security_group.app.id}"]
-  user_data = "${data.template_file.app_init.rendered}"
+  user_data = "${var.template_file}"
   instance_type = "t2.micro"
   tags = {
       Name = "${var.name}"
